@@ -131,6 +131,10 @@ function shaarli_table_build_html(array $links, $loggedIn)
         $id    = htmlspecialchars((string)($link['id'] ?? ''), ENT_QUOTES);
         $title = htmlspecialchars($link['title'] ?? 'Untitled', ENT_QUOTES);
         $url   = $link['url'] ?? '';
+        // Only allow safe schemes; replace anything else with '#' to prevent javascript: XSS.
+        if ($url !== '' && !preg_match('#^https?://#i', $url) && !preg_match('#^(ftp|ftps|magnet|mailto):#i', $url)) {
+            $url = '#';
+        }
         $urlH  = htmlspecialchars($url, ENT_QUOTES);
         $desc  = htmlspecialchars($link['description'] ?? '', ENT_QUOTES);
         $priv  = !empty($link['private']);
@@ -171,8 +175,8 @@ function shaarli_table_build_html(array $links, $loggedIn)
                 $dateDisplay = date('Y-m-d', $created);
                 $dateSort    = date('YmdHis', $created);
             } else {
-                $dateDisplay = substr((string)$created, 0, 10);
-                $dateSort    = str_replace(['-', 'T', ':'], '', (string)$created);
+                $dateDisplay = htmlspecialchars(substr((string)$created, 0, 10), ENT_QUOTES);
+                $dateSort    = htmlspecialchars(str_replace(['-', 'T', ':'], '', (string)$created), ENT_QUOTES);
             }
         }
 
